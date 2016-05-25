@@ -339,12 +339,11 @@ function InlineForm() {
 		}
 		else
 		{
-			//If we have explicityly set Success to false we try to use validator lib form-validation-{version}.js
-	        if (!$.isEmptyObject(response) && response.hasOwnProperty("OperationSuccess") && !response.OperationSuccess)
+			//If we have explicityly set Success to false we try to use validator lib form-validation-{version}.js if it exists
+	    	if (!$.isEmptyObject(response) && response.hasOwnProperty("OperationSuccess") && !response.OperationSuccess &&
+				typeof Validator !== 'undefined' && typeof Validator.ClearValidationTags === 'function' && typeof Validator.DisplayErrors === 'function')
 			{
-				//We check that the validation functionality exists
-				if (typeof Validator !== 'undefined' && typeof Validator.ClearValidationTags === 'function' && typeof Validator.DisplayErrors === 'function')
-				{
+
 					//We check that we seem to have gotten validation data back from server
 					//handle a few different formats of error
 					if (response.hasOwnProperty("Data"))
@@ -361,11 +360,10 @@ function InlineForm() {
 					else if (!$.isEmptyObject(response) && response.hasOwnProperty("OperationMessage") && response.ErrorMessage != "") {
 					    alert(response.OperationMessage);
 					}
-				} 
 			}
 			else
 			{
-				//We have not been given something in validation format 
+				//We have not been given something in validation format, or we don't have a validator present
 				
 				
 				//we look to see if we got an error text to display. This should really be a last resort.
