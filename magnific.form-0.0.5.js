@@ -257,7 +257,7 @@ function InlineForm() {
 
 						//If we use foundation, wire it up in the form
 						if (typeof popup.foundation == "function") {
-							popup.foundation('reflow');
+							popup.foundation();
 						}
 
 						if (_loadedCallback != null) {
