@@ -245,6 +245,11 @@ function InlineForm() {
 					//if we managed to display the popup we do want to close it when we click close (with close action)
 					PopupCloseIsToOpenNewForm = false;
 
+					//If we use foundation, wire it up in the form
+					if (typeof _popup.foundation == "function") {
+						_popup.foundation();
+					}
+					
 					if (_hasBeenDisplayedBefore) {
 
 						//if we just reopen an existing popup we call the redisplay callback
@@ -254,11 +259,6 @@ function InlineForm() {
 					} else { //we show this popup for the first time
 
 						_hasBeenDisplayedBefore = true;
-
-						//If we use foundation, wire it up in the form
-						if (typeof popup.foundation == "function") {
-							popup.foundation();
-						}
 
 						if (_loadedCallback != null) {
 							_loadedCallback(this.content);
