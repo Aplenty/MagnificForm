@@ -207,7 +207,11 @@ function InlineForm() {
 		//We have a form but must update the content
 		else if ($.type(_htmlResult) === "string" && _popup.find(".popup-content").html().trim() != _htmlResult.trim()) {
 		    // TODO: The line below was supposed to write out html from the response into the window. But caused a number of errors with nesting popups and sortableLists that didn't reload.
-		    //_popup.find(".popup-content").html(_htmlResult.trim());
+		    
+			//if(_popup.find(".popup-content").length > 0)
+			//{
+			//	_popup.find(".popup-content").html(_htmlResult.trim());	
+			//}
 		    bindPopupForm = true;
 		}
 		else if ($.type(_htmlResult) === "object" && (_htmlResult.hasOwnProperty("Success") || _htmlResult.hasOwnProperty("Redirect"))) {
@@ -370,6 +374,8 @@ function InlineForm() {
 				//Normally you would instead give out new html with an error nicely posted on it.
 				if (!$.isEmptyObject(response) && response.hasOwnProperty("Error") && response.Error != "") {
 					alert(response.Error);
+				} else if (!$.isEmptyObject(response) && response.hasOwnProperty("OperationMessage") && response.OperationMessage != "") {
+					alert(response.OperationMessage);
 				} else {
 
 					//we if nothing else has come true we assume we have gotten a new page to display
