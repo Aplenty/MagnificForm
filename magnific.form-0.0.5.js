@@ -23,6 +23,7 @@ function InlineForm() {
 	var _hasBeenDisplayedBefore = false;
 	var _html = null;
     var _latestresponse;
+	var _newHtml = false;
 
 	self.tmp = function() {
 		return _popup;
@@ -208,10 +209,11 @@ function InlineForm() {
 		else if ($.type(_htmlResult) === "string" && _popup.find(".popup-content").html().trim() != _htmlResult.trim()) {
 		    // TODO: The line below was supposed to write out html from the response into the window. But caused a number of errors with nesting popups and sortableLists that didn't reload.
 		    
-			//if(_popup.find(".popup-content").length > 0)
-			//{
-			//	_popup.find(".popup-content").html(_htmlResult.trim());	
-			//}
+			if(_newHtml && _popup.find(".popup-content").length > 0)
+			{
+				_newHtml = false;
+				_popup.find(".popup-content").html(_htmlResult.trim());	
+			}
 		    bindPopupForm = true;
 		}
 		else if ($.type(_htmlResult) === "object" && (_htmlResult.hasOwnProperty("Success") || _htmlResult.hasOwnProperty("Redirect"))) {
@@ -378,6 +380,8 @@ function InlineForm() {
 					alert(response.OperationMessage);
 				} else {
 
+					_newHtml = true;
+				
 					//we if nothing else has come true we assume we have gotten a new page to display
 					_htmlResult = response.Html;
 					if (typeof _htmlResult == 'undefined') {
