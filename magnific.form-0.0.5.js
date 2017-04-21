@@ -24,6 +24,15 @@ function InlineForm() {
 	var _html = null;
     var _latestresponse;
 	var _newHtml = false;
+	
+	var GetWaitHtml = function () {
+		var loadingText = "<h1>[[[Please wait...]]]</h1>";
+		if ($(".loading-anim").length) {
+			loadingText = $(".loading-anim").html();
+		}
+
+		return loadingText;
+	};
 
 	self.tmp = function() {
 		return _popup;
@@ -119,7 +128,7 @@ function InlineForm() {
 		}
 
 		if (_url != null) {
-		    $.blockUI({ message: $(".loading-anim").html() });
+		    $.blockUI({ message: GetWaitHtml() });
 
 		    $.ajax({
 		        type: _httpMethod,
@@ -227,8 +236,7 @@ function InlineForm() {
 		    _popup.find("form").not("[data-ajax='no']").ajaxForm({
 				beforeSubmit: function() {
 				    $.blockUI({ message: '' });
-				    _popup.block({ message: $(".loading-anim").html() });
-					//_popup.block({ message: '<div class="blockui-info-box">[[[Loading]]]</div>' });
+				    _popup.block({ message: GetWaitHtml() });
 				},
 				success: function(responseText, statusText, xhr) {
 					$.unblockUI();
