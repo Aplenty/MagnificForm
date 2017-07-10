@@ -110,7 +110,7 @@ function InlineForm() {
         _easyToClickAway = easyToClickAway;
         _loadedCallback = loadedCallback;
         _submittedCallback = submittedCallback;
-        _closeOnSubmit = closeOnSubmit ? closeOnSubmit : false;
+		_closeOnSubmit = !(closeOnSubmit == false); // Only disable if closeOnSubmit is explicitly false
         _closedCallback = closedCallback;
         _httpMethod = httpMethod;
         _showBreadcrumb = showBreadcrumb;
