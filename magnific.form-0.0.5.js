@@ -56,7 +56,7 @@ function InlineForm() {
         return _popup;
     };
 
-    var InitVariables(settings)
+    var InitVariables = function(settings)
     {
         if (settings.hasOwnProperty("Url")) {
             _url = settings.Url;
@@ -108,7 +108,7 @@ function InlineForm() {
         }
 
         //We only allow setting the opposite from default value (as default is already set)
-        if (settings.hasOwnProperty("HttpMethod") && settings.HttpMethodtoUpperCase() === "GET") {
+        if (settings.hasOwnProperty("HttpMethod") && settings.HttpMethod != null && settings.HttpMethod.toUpperCase() === "GET") {
             _httpMethod = "GET";
         }
 
@@ -242,10 +242,13 @@ function InlineForm() {
         }
     };
 
-    self.Close = function () {
-        event.stopPropagation();
-        event.preventDefault();
-        event.stopImmediatePropagation();
+    self.Close = function (event) {
+
+        if (event) {
+            event.stopPropagation();
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }
 
         $.magnificPopup.close();
     }
@@ -297,7 +300,7 @@ function InlineForm() {
 
             // Convenience method for automatically mapping the cancel button so it closes the form <button class="cancel">[[[Cancel]]]"</button>
             content.find("button.cancel, input[type=button].cancel").on("click", function (event) {
-                self.Close();
+                self.Close(event);
             });
 
 
