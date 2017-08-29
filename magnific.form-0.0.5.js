@@ -5,24 +5,27 @@ function InlineForm() {
 
     var self = this;
 
-    var _url;
-    var _params;
-    var _easyToClickAway;
-    var _loadedCallback;
-    var _submittedCallback;
+    var _url = null;
+    var _params = {};
+    var _easyToClickAway = false;
+    var _loadedCallback = null;
+    var _submittedCallback = null;
     var _closeOnSubmit = true;
-    var _closedCallback;
-    var _httpMethod;
-    var _showBreadcrumb;
-    var _addToQueue;
-    var _clearPopupsOnClose;
-    var _popupName;
-    var _refreshOnNavigate;
-    var _popupRedisplayCallback;
+    var _closedCallback = null;
+    var _httpMethod = "POST";
+    var _showBreadcrumb = false;
+    var _cssClasses = null;
+    var _addToQueue = false;
+    var _clearPopupsOnClose = false;
+    var _popupName = null;
+    var _popupRedisplayCallback = null;
+    var _html = null;
+
+
+
     var _htmlResult = null;
     var _popup = null; //the actual popup DOM
     var _hasBeenDisplayedBefore = false;
-    var _html = null;
     var _latestresponse;
     var _newHtml = false;
 
@@ -53,7 +56,80 @@ function InlineForm() {
         return _popup;
     };
 
+    var InitVariables(settings)
+    {
+        if (settings.hasOwnProperty("Url")) {
+            _url = settings.Url;
+        }
 
+        if (settings.hasOwnProperty("UrlParameters") && settings.UrlParameters != null) {
+            _params = settings.UrlParameters;
+        }
+
+        //We only allow setting the opposite from default value (as default is already set)
+        if (settings.hasOwnProperty("EasyToClickAway") && settings.EasyToClickAway === true) {
+            _easyToClickAway = true;
+        }
+
+        if (settings.hasOwnProperty("LoadedCallback")) {
+            _loadedCallback = settings.LoadedCallback;
+        }
+
+        if (settings.hasOwnProperty("SubmittedCallback")) {
+            _submittedCallback = settings.SubmittedCallback;
+        }
+
+        if (settings.hasOwnProperty("ClosedCallback")) {
+            _closedCallback = settings.ClosedCallback;
+        }
+
+        if (settings.hasOwnProperty("PopupRedisplayCallback")) {
+            _popupRedisplayCallback = settings.PopupRedisplayCallback;
+        }
+
+        //We only allow setting the opposite from default value (as default is already set)
+        if (settings.hasOwnProperty("CloseOnSubmit") && settings.CloseOnSubmit === false) {
+            _closeOnSubmit = false;
+        }
+
+        //We only allow setting the opposite from default value (as default is already set)
+        if (settings.hasOwnProperty("ShowBreadcrumb") && settings.ShowBreadcrumb === true) {
+            _showBreadcrumb = true;
+        }
+
+        //We only allow setting the opposite from default value (as default is already set)
+        if (settings.hasOwnProperty("AddToQueue") && settings.AddToQueue === true) {
+            _addToQueue = true;
+        }
+
+        //We only allow setting the opposite from default value (as default is already set)
+        if (settings.hasOwnProperty("ClearPopupsOnClose") && settings.ClearPopupsOnClose === true) {
+            _clearPopupsOnClose = true;
+        }
+
+        //We only allow setting the opposite from default value (as default is already set)
+        if (settings.hasOwnProperty("HttpMethod") && settings.HttpMethodtoUpperCase() === "GET") {
+            _httpMethod = "GET";
+        }
+
+        if (settings.hasOwnProperty("CssClasses")) {
+            _cssClasses = settings.CssClasses;
+        }
+
+        if (settings.hasOwnProperty("PopupName")) {
+            _popupName = settings.PopupName;
+        }
+
+        if (settings.hasOwnProperty("Html")) {
+            _html = settings.Html;
+        }
+    }
+
+
+    
+    ///
+    /// OBS OBS LEGACY METHODS, USE InitWithSettings FOR NEW USAGE
+    ///
     //quick method for self.init (most common options)
     self.QuickInit = function (url, loadedCallback, submittedCallback, closedCallback) {
         self.init(url, null, false, loadedCallback, submittedCallback, closedCallback, null, false, false, true, "", null, null, true);
@@ -74,51 +150,56 @@ function InlineForm() {
         self.init(null, null, false, loadedCallback, submittedCallback, closedCallback, null, true, true, clearPopupsOnClose, popupName, popupRedisplayCallback, html, true);
     };
 
+    self.init = function(url, urlParams, easyToClickAway, loadedCallback, submittedCallback, closedCallback, httpMethod, showBreadcrumb, addToQueue, clearPopupsOnClose, popupName, popupRedisplayCallback, html, closeOnSubmit) {
 
+        var settings =
+        {
+              Url: url,
+              UrlParameters: urlParams,
+              EasyToClickAway: easyToClickAway,
+              LoadedCallback: loadedCallback,
+              SubmittedCallback: submittedCallback,
+              ClosedCallback: closedCallback,
+              PopupRedisplayCallback: popupRedisplayCallback,
+              HttpMethod: httpMethod,
+              ShowBreadcrumb: showBreadcrumb,
+              AddToQueue: addToQueue,
+              ClearPopupsOnClose: clearPopupsOnClose,
+              PopupName: popupName,
+              Html: html,
+              CloseOnSubmit: closeOnSubmit
+        }
 
-    //url - the url to load in the popup
-    //urlParams - any url parameters that are to be sent with
-    //easyToClickAway - if true it will only close popups on the X and ESC key (instead of anywhere in the background). This plugin also closed popup on successfull submit of data
-    //loadedCallback - a callback method that will be called when the popup is loaded. very handy for attaching scripts and behaviour to things in the popup, sends with the content of the popup as parameter
-    //submittedCallback - sends you the respons that was returned from the server after a form submit (you get one parameter with the return data). This plugin also can redirect, redisplay popup and if successful close the popup so this is a less commonly used callback
-    //closedCallback - called when the popup is being closed, it makes no difference if closed by user or closed due to successfull submit. no parameter sent with. good for updating the view underneath the popup
-    //httpMethod - the http method can be "GET", any other value (including null) makes it assume "POST" which is default
-    //showBreadcrumb - When opening a popup from another popup it can be configured to show a breadcrumb that allows going back to a previous popup
-    //addToQueue - if true this popup will be added to the queue enabling popups that this popup in turn opens to navigate back to it
-    //clearPopupsOnClose - if true we only go back to previous popups via breadcrumb as all kinds of close will clear queue and go back to page
-    //popupName - the name that will be in the breadcrumb if activated
-    //popupRedisplayCallback - A callback that is called when a popup is redisplayed, good for updating data that change from further popups. Sends with the html of the popup, same os loadedCallback
-    //html - Lets the caller populte the dialog with it's own Html instead of laoding it fron Url (requires that Url == null)
-    self.init = function (url, urlParams, easyToClickAway, loadedCallback, submittedCallback, closedCallback, httpMethod, showBreadcrumb, addToQueue, clearPopupsOnClose, popupName, popupRedisplayCallback, html, closeOnSubmit) {
+        self.InitWithSettings(settings);
+    }
+
+    //settings is js object with following settings possible. only set the ones you want different than default values below. (callbacks are default null, only shows otherwise to simplify')
+    //{
+    //      Url: null //string with url that gives out the html/form to show
+    //      UrlParameters: {} //OPTIONAL - Any url parameters you want to include and send with: Format like { name: "John", location: "Boston" }
+    //      EasyToClickAway: false //If false it will only close popups on the X and ESC key (instead of anywhere in the background).
+    //      LoadedCallback: function(popup) //Callback method that will be called when the popup is loaded, sends with the content of the popup as parameter
+    //      SubmittedCallback: function(responseData) //Callback method, triggered after getting response back efter a submit includes response data
+    //      ClosedCallback: function() //Callback method, called before popup closes (successfull submit or user action)
+    //      PopupRedisplayCallback: function(popup) //A callback that is called when a popup is redisplayed, send with popup, same as on LoadedCallback
+    //      HttpMethod: "POST" //"GET" or "POST" (default)
+    //      ShowBreadcrumb: false //If true, displays a breadcrumb path at top of popup (good for popup opening second popup)
+    //      AddToQueue: false //If true this popup will be added to the list of open popups meaning you can navigate back to it with breadcrumbs
+    //      ClearPopupsOnClose: false //If true we close all popups when closing this one and ignore any queue.
+    //      PopupName: null //The name of this popup as displayed in breadcrumbs
+    //      Html: null //Lets the caller populte the dialog with it's own Html instead of laoding it fron Url (requires that Url == null)
+    //      CloseOnSubmit: true //If true will close the popup on a successfull submit (just before SubmittedCallback is called)
+    //      CssClasses: null //A space separated list of classes this popup will get i.e. "large blue"
+    //}
+    self.InitWithSettings = function (settings) {
+
+        InitVariables(settings);
+   
 
         //We alwayc start by closing any possible popup that might be open. This is because the popup does not load with all events properly otherwise
         PopupCloseIsToOpenNewForm = true;
         $.magnificPopup.close();
 
-        var params = urlParams;
-        if (typeof urlParams == "undefined" || urlParams == null || urlParams == "") {
-            params = {};
-        }
-
-        if (typeof httpMethod == "undefined" || httpMethod == null || httpMethod == "" || httpMethod != "GET") {
-            httpMethod = "POST";
-        }
-
-        //put all in variables so we can save the whole object with it's state
-        _url = url;
-        _params = params;
-        _easyToClickAway = easyToClickAway;
-        _loadedCallback = loadedCallback;
-        _submittedCallback = submittedCallback;
-		_closeOnSubmit = !(closeOnSubmit == false); // Only disable if closeOnSubmit is explicitly false
-        _closedCallback = closedCallback;
-        _httpMethod = httpMethod;
-        _showBreadcrumb = showBreadcrumb;
-        _addToQueue = addToQueue;
-        _clearPopupsOnClose = clearPopupsOnClose;
-        _popupName = popupName;
-        _popupRedisplayCallback = popupRedisplayCallback;
-        _html = html;
 
         if (_addToQueue) {
 
@@ -181,6 +262,10 @@ function InlineForm() {
         if (_popup == null && !_hasBeenDisplayedBefore) {
 
             var popup = $("<div>").addClass("white-popup");
+
+            if (_cssClasses != null) {
+                popup.addClass(_cssClasses);
+            }
 
             if (_showBreadcrumb) {
                 var breadCrumb = $("<ul>").addClass("breadcrumbs");
