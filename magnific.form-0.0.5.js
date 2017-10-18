@@ -484,6 +484,11 @@ function InlineForm() {
                     }
 
                     self.DisplayPopup();
+					
+					// New html, means new load callback.
+					if (_loadedCallback != null) {
+                        _loadedCallback(_htmlResult);
+                    }
                 }
             }
         }
