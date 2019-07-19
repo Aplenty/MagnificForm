@@ -290,7 +290,7 @@ MagnificPopup.prototype = {
 		//Fugly, superglobal to stop poopup closing, tried to use built in default first
 		// Close on ESC key
 		_document.on('keyup' + EVENT_NS, function(e) {
-			if(stopPopupClosing !== undefined && !stopPopupClosing && e.keyCode === 27) {
+			if((stopPopupClosing === undefined || !stopPopupClosing) && e.keyCode === 27) {
 				mfp.close();
 			}
 		});
