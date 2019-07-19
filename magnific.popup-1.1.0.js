@@ -290,7 +290,7 @@ MagnificPopup.prototype = {
 		//Changed to always bind keyup but check current setting before closing
 		// Close on ESC key
 		_document.on('keyup' + EVENT_NS, function(e) {
-			if(mfp.st.enableEscapeKey && e.keyCode === 27) {
+			if($.magnificPopup.defaults.enableEscapeKey && e.keyCode === 27) {
 				mfp.close();
 			}
 		});
